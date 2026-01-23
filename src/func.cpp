@@ -16,7 +16,7 @@ struct Power<number, 0>
 
 static constexpr int MAX_NEXT_MULT = (Power<2, 31>::value - 1) / 10;
 
-bool str2int(const std::string &str, int *result)
+bool str2int(const std::string_view &str, int *result)
 {
     if (str.empty())
     {
@@ -57,7 +57,7 @@ bool str2int(const std::string &str, int *result)
     return true;
 }
 
-bool isOctetOk(const std::string &oct)
+bool isOctetOk(const std::string_view &oct)
 {
     // std::cout << "isOctetOk(" << oct << ")" << std::endl;
     const auto size = oct.size();
@@ -75,34 +75,32 @@ bool isOctetOk(const std::string &oct)
     return value <= 255;
 }
 
-static std::string createIpStringForPos(const std::string &str, int pos1, int pos2, int pos3)
+static std::string createIpStringForPos(const std::string_view &str, int pos1, int pos2, int pos3)
 {
-    std::string out;
-
-    std::string tmp = str.substr(0, pos1);
-    if (isOctetOk(tmp))
+    std::string_view oct1 = str.substr(0, pos1);
+    std::string_view oct2 = str.substr(pos1, pos2 - pos1);
+    std::string_view oct3 = str.substr(pos2, pos3 - pos2);
+    std::string_view oct4 = str.substr(pos3, str.size());
+    if (isOctetOk(oct1) &&
+        isOctetOk(oct2) &&
+        isOctetOk(oct3) &&
+        isOctetOk(oct4))
     {
-        out = tmp + '.';
+        std::string out;
+
+        out.reserve(str.size() + 3);
+        out = oct1;
+        out += '.';
+        out += oct2;
+        out += '.';
+        out += oct3;
+        out += '.';
+        out += oct4;
+
+        return out;
     }
 
-    tmp = str.substr(pos1, pos2 - pos1);
-    if (isOctetOk(tmp))
-    {
-        out += (tmp + '.');
-    }
-
-    tmp = str.substr(pos2, pos3 - pos2);
-    if (isOctetOk(tmp))
-    {
-        out += (tmp + '.');
-    }
-
-    tmp = str.substr(pos3, str.size());
-    if (isOctetOk(tmp))
-    {
-        out += tmp;
-    }
-    return out;
+    return std::string();
 }
 
 std::vector<std::string> genIPs(const std::string &input)
@@ -128,6 +126,9 @@ std::vector<std::string> genIPs(const std::string &input)
 
     std::vector<std::string> result;
     std::string out = createIpStringForPos(input, pos_1, pos_2, pos_3);
-    result.push_back(out);
+    if (!out.empty())
+    {
+        result.push_back(out);
+    }
     return result;
 }
