@@ -1,8 +1,10 @@
 #include "func.hpp"
+#include <array>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
+#if 1
 TEST_CASE("str2int()")
 {
     int result = 0;
@@ -63,6 +65,12 @@ TEST_CASE("2552552552551 -> to big, empty")
     CHECK(out.empty());
 }
 
+TEST_CASE("254255256255 -> one octet bad")
+{
+    const auto out = genIPs("2552552562555");
+    CHECK(out.empty());
+}
+
 TEST_CASE("1234 -> 1.2.3.4")
 {
     const auto out = genIPs("1234");
@@ -84,24 +92,33 @@ TEST_CASE("111100 -> 1.1.1.100")
     CHECK_EQ(out.at(0), "1.1.1.100");
 }
 
-// TEST_CASE("22222 -> 2.2.2.22, 2.2.22.2")
-// {
-//     const auto out = genIPs("22222");
-//     CHECK(out.size() == 2);
-//     CHECK_EQ(out.at(0), "2.2.2.22");
-//     CHECK_EQ(out.at(1), "2.2.22.2");
-// }
+TEST_CASE("255255255255 -> 255.255.255.255")
+{
+    const auto out = genIPs("255255255255");
+    CHECK(out.size() == 1);
+    CHECK_EQ(out.at(0), "255.255.255.255");
+}
 
+#endif
+TEST_CASE("112233")
+{
+    const auto out = genIPs("112233");
+    const std::vector<std::string_view> expected{
+        "1.1.2.233", "1.1.22.33", "1.1.223.3",
+        "1.12.2.33", "1.12.23.3", "1.122.3.3",
+        "11.2.2.33", "11.2.23.3", "11.22.3.3",
+        "112.2.3.3"};
+
+    CHECK(out.size() == expected.size());
+    int it = 0;
+    for (const auto it_exp : expected)
+    {
+        CHECK_EQ(out.at(it++), it_exp);
+    }
+}
 
 /*
-1111 -> 1.1.1.1
-11223344 -> 1.1.2.23344
-            1.1.22.3344
-            1.1.223.344
-            1.1.2233.44
-            1.1.22334.4
-            1.12.2.3344
-            1.12.23.344
+11223344 -> 1.1.223.344
             1.12.233.44
             1.122.3
 

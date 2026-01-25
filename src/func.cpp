@@ -16,6 +16,18 @@ struct Power<number, 0>
 
 static constexpr int MAX_NEXT_MULT = (Power<2, 31>::value - 1) / 10;
 
+static inline bool isOnlyDigits(const std::string_view &str)
+{
+    for (const auto it : str)
+    {
+        if (it < '0' || it > '9')
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool str2int(const std::string_view &str, int *result)
 {
     if (str.empty())
@@ -23,12 +35,9 @@ bool str2int(const std::string_view &str, int *result)
         return false;
     }
 
-    for (const auto it : str)
+    if (!isOnlyDigits(str))
     {
-        if (it < '0' || it > '9')
-        {
-            return false;
-        }
+        return false;
     }
 
     int d = 0;
@@ -77,6 +86,14 @@ bool isOctetOk(const std::string_view &oct)
 
 static std::string createIpStringForPos(const std::string_view &str, int pos1, int pos2, int pos3)
 {
+    std::string out;
+
+    if (!isOnlyDigits(str))
+    {
+        return out;
+    }
+
+    // std::cout << "createIpStringForPos(" << pos1 << ", " << pos2 << ", " << pos3 << ")" << std::endl;
     std::string_view oct1 = str.substr(0, pos1);
     std::string_view oct2 = str.substr(pos1, pos2 - pos1);
     std::string_view oct3 = str.substr(pos2, pos3 - pos2);
@@ -100,35 +117,39 @@ static std::string createIpStringForPos(const std::string_view &str, int pos1, i
         return out;
     }
 
-    return std::string();
+    return out;
 }
 
 std::vector<std::string> genIPs(const std::string &input)
 {
     const auto size = input.size();
-    if (input.empty() || size < 4 || size > (4 * 3))
+    constexpr auto MAX_SIZE_4_OCT = 4 * 3;
+    std::vector<std::string> result;
+
+    if (input.empty() || size < 4 || size > MAX_SIZE_4_OCT)
     {
-        return {};
+        return result;
     }
 
     int pos_1 = 1;
     int pos_2 = 2;
     int pos_3 = 3;
-    // for (int it = 0; it < str.size();)
-    // {
-    //     out.push_back(str.at(it));
-    //     ++it;
-    //     if (it == pos1 || it == pos2 || it == pos3)
-    //     {
-    //         out.push_back('.');
-    //     }
-    // }
 
-    std::vector<std::string> result;
-    std::string out = createIpStringForPos(input, pos_1, pos_2, pos_3);
-    if (!out.empty())
+    for (pos_1 = 1; pos_1 < pos_2; pos_1++)
     {
-        result.push_back(out);
+        for (pos_2 = pos_1 + 1; pos_2 < pos_3; pos_2++)
+        {
+            for (pos_3 = pos_2 + 1; pos_3 < size; pos_3++)
+            {
+                auto out = createIpStringForPos(input, pos_1, pos_2, pos_3);
+                if (!out.empty())
+                {
+                    // std::cout << "PUSH: " << out << std::endl;
+                    result.push_back(std::move(out));
+                }
+            }
+        }
     }
+
     return result;
 }
