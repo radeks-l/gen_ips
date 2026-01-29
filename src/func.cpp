@@ -88,11 +88,6 @@ static std::string createIpStringForPos(const std::string_view &str, int pos1, i
 {
     std::string out;
 
-    if (!isOnlyDigits(str))
-    {
-        return out;
-    }
-
     // std::cout << "createIpStringForPos(" << pos1 << ", " << pos2 << ", " << pos3 << ")" << std::endl;
     std::string_view oct1 = str.substr(0, pos1);
     std::string_view oct2 = str.substr(pos1, pos2 - pos1);
@@ -103,8 +98,6 @@ static std::string createIpStringForPos(const std::string_view &str, int pos1, i
         isOctetOk(oct3) &&
         isOctetOk(oct4))
     {
-        std::string out;
-
         out.reserve(str.size() + 3);
         out = oct1;
         out += '.';
@@ -126,25 +119,24 @@ std::vector<std::string> genIPs(const std::string &input)
     constexpr auto MAX_SIZE_4_OCT = 4 * 3;
     std::vector<std::string> result;
 
-    if (input.empty() || size < 4 || size > MAX_SIZE_4_OCT)
+    if (input.empty() || size < 4 || size > MAX_SIZE_4_OCT || !isOnlyDigits(input))
     {
         return result;
     }
 
-    int pos_1 = 1;
-    int pos_2 = 2;
-    int pos_3 = 3;
-
-    for (pos_1 = 1; pos_1 < pos_2; pos_1++)
+    // let optimize starting point
+    const auto pos_1 = std::max(1, int(size - 3 - 3 - 3));
+    for (int i = pos_1; i < 4; i++)
     {
-        for (pos_2 = pos_1 + 1; pos_2 < pos_3; pos_2++)
+        const auto pos_2 = std::max(i + 1, int(size - 3 - 3));
+        for (int j = pos_2; (j - pos_1) < 4; j++)
         {
-            for (pos_3 = pos_2 + 1; pos_3 < size; pos_3++)
+            const auto pos_3 = std::max(j + 1, int(size - 3));
+            for (int k = pos_3; k < size; k++)
             {
-                auto out = createIpStringForPos(input, pos_1, pos_2, pos_3);
+                auto out = createIpStringForPos(input, i, j, k);
                 if (!out.empty())
                 {
-                    // std::cout << "PUSH: " << out << std::endl;
                     result.push_back(std::move(out));
                 }
             }

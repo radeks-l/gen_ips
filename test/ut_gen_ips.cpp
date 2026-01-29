@@ -4,15 +4,14 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#if 1
 TEST_CASE("str2int()")
 {
-    int result = 0;
     CHECK_FALSE(str2int("", nullptr));
     CHECK_FALSE(str2int("120d", nullptr));
     CHECK_FALSE(str2int("-120", nullptr));
     CHECK(str2int("12", nullptr));
 
+    int result = 0;
     CHECK(str2int("1", &result));
     CHECK_EQ(1, result);
 
@@ -99,13 +98,13 @@ TEST_CASE("255255255255 -> 255.255.255.255")
     CHECK_EQ(out.at(0), "255.255.255.255");
 }
 
-#endif
 TEST_CASE("112233")
 {
     const auto out = genIPs("112233");
     const std::vector<std::string_view> expected{
         "1.1.2.233", "1.1.22.33", "1.1.223.3",
-        "1.12.2.33", "1.12.23.3", "1.122.3.3",
+        "1.12.2.33", "1.12.23.3",
+        "1.122.3.3",
         "11.2.2.33", "11.2.23.3", "11.22.3.3",
         "112.2.3.3"};
 
@@ -118,8 +117,12 @@ TEST_CASE("112233")
 }
 
 /*
-11223344 -> 1.1.223.344
-            1.12.233.44
+112233445 ->    1.12.233.445
+                1.122.33.445
+                1.122.334.45
+                11.2.233.445
+                11.22.334.45
+                11.22.334.45
             1.122.3
 
 */
