@@ -35,11 +35,6 @@ bool str2int(const std::string_view &str, int *result)
         return false;
     }
 
-    if (!isOnlyDigits(str))
-    {
-        return false;
-    }
-
     int d = 0;
     int mult = 1;
     int it = 0;
@@ -68,7 +63,6 @@ bool str2int(const std::string_view &str, int *result)
 
 bool isOctetOk(const std::string_view &oct)
 {
-    // std::cout << "isOctetOk(" << oct << ")" << std::endl;
     const auto size = oct.size();
     if (size == 0 || size > 3 || '0' == oct.at(0))
     {
@@ -88,7 +82,6 @@ static std::string createIpStringForPos(const std::string_view &str, int pos1, i
 {
     std::string out;
 
-    // std::cout << "createIpStringForPos(" << pos1 << ", " << pos2 << ", " << pos3 << ")" << std::endl;
     std::string_view oct1 = str.substr(0, pos1);
     std::string_view oct2 = str.substr(pos1, pos2 - pos1);
     std::string_view oct3 = str.substr(pos2, pos3 - pos2);
@@ -117,22 +110,25 @@ std::vector<std::string> genIPs(const std::string &input)
 {
     const auto size = input.size();
     constexpr auto MAX_SIZE_4_OCT = 4 * 3;
-    std::vector<std::string> result;
 
     if (input.empty() || size < 4 || size > MAX_SIZE_4_OCT || !isOnlyDigits(input))
     {
-        return result;
+        return {};
     }
 
     // let optimize starting point
-    const auto pos_1 = std::max(1, int(size - 3 - 3 - 3));
+    const int pos_1_max = size - 9;
+    const int pos_2_max = size - 6;
+    const int pos_3_max = size - 3;
+    const auto pos_1 = std::max(1, pos_1_max);
+    std::vector<std::string> result;
     for (int i = pos_1; i < 4; i++)
     {
-        const auto pos_2 = std::max(i + 1, int(size - 3 - 3));
-        for (int j = pos_2; (j - pos_1) < 4; j++)
+        const auto pos_2 = std::max(i + 1, pos_2_max);
+        for (int j = pos_2, jump_2 = 0; (j - i) < 4; j++)
         {
-            const auto pos_3 = std::max(j + 1, int(size - 3));
-            for (int k = pos_3; k < size; k++)
+            const auto pos_3 = std::max(j + 1, pos_3_max);
+            for (int k = pos_3; (k - j < 4) && (k < size); k++)
             {
                 auto out = createIpStringForPos(input, i, j, k);
                 if (!out.empty())

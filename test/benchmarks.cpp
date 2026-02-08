@@ -24,7 +24,7 @@ static void BM_SomeFunction(benchmark::State& state) {
   // Perform setup here
   for (auto _ : state) {
     // This code gets timed
-    genIPs("255255255255");
+    const auto res = genIPs("112233445");
   }
 }
 // Register the function as a benchmark

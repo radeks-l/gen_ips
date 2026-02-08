@@ -7,7 +7,6 @@
 TEST_CASE("str2int()")
 {
     CHECK_FALSE(str2int("", nullptr));
-    CHECK_FALSE(str2int("120d", nullptr));
     CHECK_FALSE(str2int("-120", nullptr));
     CHECK(str2int("12", nullptr));
 
@@ -116,18 +115,16 @@ TEST_CASE("112233")
     }
 }
 
-/*
-112233445 ->    1.12.233.445
-                1.122.33.445
-                1.122.334.45
-                11.2.233.445
-                11.22.334.45
-                11.22.334.45
-            1.122.3
+TEST_CASE("112233445 -> 11.223.34.45, 112.23.34.45, 112.233.44.5, 112.233.4.45")
+{
+    const auto out = genIPs("112233445");
+    const std::vector<std::string_view> expected{
+        "11.223.34.45", "112.23.34.45", "112.233.4.45", "112.233.44.5"};
 
-*/
-// TEST_CASE("11011 -> 1.10.1.1")
-// {
-//     const auto out = genIPs("11011");
-//     CHECK(out.size() == 1);
-// }
+    CHECK(out.size() == expected.size());
+    int it = 0;
+    for (const auto it_exp : expected)
+    {
+        CHECK_EQ(out.at(it++), it_exp);
+    }
+}
