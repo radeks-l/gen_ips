@@ -64,18 +64,36 @@ bool str2int(const std::string_view &str, int *result)
 bool isOctetOk(const std::string_view &oct)
 {
     const auto size = oct.size();
-    if (size == 0 || size > 3 || '0' == oct.at(0))
+    if (size == 0 || size > 3 || '0' == oct[0])
     {
         return false;
     }
 
-    int value = 0;
-    if (!str2int(oct, &value))
+    if (size == 3)
     {
-        return false;
+        const auto f = oct[0];
+        switch (f)
+        {
+            case '1':
+                return true;
+            case '2':
+            {
+                const auto s = oct[1];
+                if (s > '5')
+                {
+                    return false;
+                }
+                if (s == '5' && oct[2] > '5')
+                {
+                    return false;
+                }
+                return true;
+            }
+            default:
+                return false;
+        }
     }
-
-    return value <= 255;
+    return true;
 }
 
 static std::string createIpStringForPos(const std::string_view &str, int pos1, int pos2, int pos3)

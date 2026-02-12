@@ -27,6 +27,15 @@ static void BM_SomeFunction(benchmark::State& state) {
     const auto res = genIPs("112233445");
   }
 }
+
+static void BM_IsOctetOk(benchmark::State& state) {
+  // Perform setup here
+  for (auto _ : state) {
+    // This code gets timed
+    const auto res = isOctetOk("245");
+  }
+}
+
 // Register the function as a benchmark
 BENCHMARK(BM_SomeFunction);
 
