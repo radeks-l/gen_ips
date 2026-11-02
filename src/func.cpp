@@ -1,5 +1,4 @@
 #include "func.hpp"
-#include <cstdint>
 #include <iostream>
 
 template <int number, int pow>
@@ -139,11 +138,13 @@ std::vector<std::string> genIPs(const std::string &input)
     const int pos_2_max = size - 6;
     const int pos_3_max = size - 3;
     const auto pos_1 = std::max(1, pos_1_max);
+
     std::vector<std::string> result;
+
     for (int i = pos_1; i < 4; i++)
     {
         const auto pos_2 = std::max(i + 1, pos_2_max);
-        for (int j = pos_2, jump_2 = 0; (j - i) < 4; j++)
+        for (int j = pos_2; (j - i) < 4; j++)
         {
             const auto pos_3 = std::max(j + 1, pos_3_max);
             for (int k = pos_3; (k - j < 4) && (k < size); k++)
